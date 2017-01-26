@@ -77,6 +77,7 @@ sub on_hup {
 
 sub event_cb {
    my $d = shift;
+   return if(!$d);
 
    my $event = "";
    if(($d->{'Type'})&&($d->{'Action'})&&($d->{'Actor'})) {
@@ -88,7 +89,7 @@ sub event_cb {
       mylog("Docker event: $d->{'status'} of $d->{'from'}");
    }
 
-   return if((!$event)||($d->{'status'} !~ /^(start|die)$/));
+   return if(!$event || !($d->{'status'})) || ($d->{'status'} !~ /^(start|die)$/);
 
    my $eventstr = $event . ($d->{'from'} ? " - ".$d->{'from'} : "");
    mylog("Rebuilding DFWFW due to Docker event: $eventstr");
@@ -101,6 +102,8 @@ sub headers_cb {
    # first time HTTP headers arrived from the docker daemon
    # this is a tricky solution to reach a race condition free state
 
+   mylog("Rebuilding Docker configuration due to new connection to Docker agent");
+   $fire->fetch_docker_configuration();
    $fire->rebuild();
 
    if($c_one_shot) {
@@ -117,8 +120,8 @@ sub monitor_changes {
    $api->set_headers_callback(\&headers_cb);
 
    while(1) {
-      $api->events(\&event_cb);
-      mylog("Docker events stream ended :(");
+      my $response = $api->events(\&event_cb);
+      mylog("Docker events stream ended: $response\n");
 
       # We try to reconnect in a second. If we can't, the process will exit
       sleep(1);
