@@ -91,7 +91,6 @@ sub event_cb {
    return if((!$event)||($d->{'status'} !~ /^(start|die)$/));
 
    my $eventstr = $event . ($d->{'from'} ? " - ".$d->{'from'} : "");
-   $logger->set_key($eventstr);
    mylog("Rebuilding DFWFW due to Docker event: $eventstr");
 
    $fire->fetch_docker_configuration();
