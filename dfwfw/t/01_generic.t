@@ -44,6 +44,13 @@ for my $test (@tests) {
 
      return $docker_defs->{'mocked_container_infos'}->{$id}; 
   });
+  $api_module->mock('network_info', sub {
+     my ($obj, $id) = @_;
+
+     die "DFWFW tried to query an unexpected network info" if(!defined($docker_defs->{'mocked_network_infos'}->{$id}));
+
+     return $docker_defs->{'mocked_network_infos'}->{$id}; 
+  });
 
 
   my $info_module = Test::MockModule->new('WebService::Docker::Info');
