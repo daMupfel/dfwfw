@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:bullseye
 
 MAINTAINER imre.rad@search-lab.hu
 
